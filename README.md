@@ -58,9 +58,8 @@ Prerequisites
 ### Running with Docker
 To run the application and Redis using Docker, follow these steps:
 
-Clone the repository:
-
-1. git clone https://github.com/your-username/RepoScorer.git
+1. Download the repository from
+https://github.com/saquibw/RepoScorer.git
 cd RepoScorer
 
 2. Build the Docker images and start the services:
@@ -77,13 +76,16 @@ You can access the Swagger UI at http://localhost:8080/swagger-ui/index.html to 
 ### Running Without Docker
 If you prefer to run the application without Docker, follow these steps:
 
-1. Clone the repository:
-git clone https://github.com/your-username/RepoScorer.git
+1. Download the repository from:
+https://github.com/saquibw/RepoScorer.git
 cd RepoScorer
+
 2. Build the application using Gradle:
 ./gradlew build
+
 3. Run the application:
 java -jar build/libs/RepoScorer-0.0.1-SNAPSHOT.jar
+
 4. Access the application at http://localhost:8080.
 
 
