@@ -1,4 +1,4 @@
-package com.scorer.repo.github;
+package com.scorer.repo.dto;
 
 import lombok.Data;
 

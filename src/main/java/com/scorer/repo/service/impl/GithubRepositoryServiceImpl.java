@@ -1,4 +1,4 @@
-package com.scorer.repo.github;
+package com.scorer.repo.service.impl;
 
 import java.time.Duration;
 import java.util.List;
@@ -6,12 +6,13 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.scorer.repo.common.RepositoryCacheService;
-import com.scorer.repo.common.RepositoryDto;
-import com.scorer.repo.common.RepositoryResponse;
-import com.scorer.repo.common.RepositoryScorer;
-import com.scorer.repo.common.RepositoryService;
+import com.scorer.repo.client.RedisClient;
 import com.scorer.repo.config.GithubConfig;
+import com.scorer.repo.dto.GithubRepositoryDto;
+import com.scorer.repo.dto.RepositoryDto;
+import com.scorer.repo.response.RepositoryResponse;
+import com.scorer.repo.service.RepositoryScorerService;
+import com.scorer.repo.service.RepositoryService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,16 +20,15 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class GithubRepositoryService implements RepositoryService{
+public class GithubRepositoryServiceImpl implements RepositoryService{
 
 	private final WebClient githubWebClient;
-	private final RepositoryScorer repositoryScorer;
-	private final RepositoryCacheService repositoryCacheService;
+	private final RepositoryScorerService repositoryScorer;
+	private final RedisClient repositoryCacheService;
 	private final GithubConfig githubConfig;
 
 	@Override
 	public RepositoryResponse fetchRepositories(String language, String createdAfter, Integer page) {
-		System.out.println(page);
 		String cacheKey = githubConfig.getCachePrefix() + language + ":" + createdAfter + page;
 
 		RepositoryResponse cachedRepositories = repositoryCacheService.getItem(cacheKey, RepositoryResponse.class);

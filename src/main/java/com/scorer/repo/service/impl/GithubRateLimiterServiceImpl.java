@@ -1,18 +1,18 @@
-package com.scorer.repo.github;
+package com.scorer.repo.service.impl;
 
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.stereotype.Service;
 
-import com.scorer.repo.common.RateLimiterService;
-import com.scorer.repo.common.RepositoryCacheService;
+import com.scorer.repo.client.RedisClient;
+import com.scorer.repo.service.RateLimiterService;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class GithubRateLimiterService implements RateLimiterService {
-	private final RepositoryCacheService repositoryCacheService;
+public class GithubRateLimiterServiceImpl implements RateLimiterService {
+	private final RedisClient repositoryCacheService;
 	
 	private static final int MAX_REQUESTS_PER_HOUR = 5000;
     private static final String RATE_LIMIT_KEY = "github-api-request-count:";

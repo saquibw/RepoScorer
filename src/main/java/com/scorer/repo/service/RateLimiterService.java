@@ -1,4 +1,4 @@
-package com.scorer.repo.common;
+package com.scorer.repo.service;
 
 import java.time.Duration;
 import java.time.Instant;

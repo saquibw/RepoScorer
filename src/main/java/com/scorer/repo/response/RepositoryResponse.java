@@ -1,8 +1,8 @@
-package com.scorer.repo.common;
+package com.scorer.repo.response;
 
 import java.util.List;
 
-import com.scorer.repo.common.RepositoryDto;
+import com.scorer.repo.dto.RepositoryDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

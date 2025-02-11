@@ -1,7 +1,6 @@
-package com.scorer.repo.common;
+package com.scorer.repo.client;
 
 import java.time.Duration;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.data.redis.core.RedisTemplate;
@@ -13,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class RepositoryCacheService {
+public class RedisClient {
 
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final ObjectMapper objectMapper;
@@ -36,9 +35,5 @@ public class RepositoryCacheService {
     
     public void expire(String key, long timeout, TimeUnit unit) {
     	redisTemplate.expire(key, timeout, unit);
-    }
-    
-    private Object get(String key) {
-    	return redisTemplate.opsForValue().get(key);
     }
 }

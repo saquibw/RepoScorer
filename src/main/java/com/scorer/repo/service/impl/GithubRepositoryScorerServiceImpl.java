@@ -1,15 +1,15 @@
-package com.scorer.repo.github;
+package com.scorer.repo.service.impl;
 
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 
 import org.springframework.stereotype.Service;
 
-import com.scorer.repo.common.RepositoryDto;
-import com.scorer.repo.common.RepositoryScorer;
+import com.scorer.repo.dto.RepositoryDto;
+import com.scorer.repo.service.RepositoryScorerService;
 
 @Service
-public class GithubRepositoryScorer implements RepositoryScorer{
+public class GithubRepositoryScorerServiceImpl implements RepositoryScorerService{
 	@Override
     public double calculateScore(RepositoryDto repository) {
         // Stars weight: 2x
