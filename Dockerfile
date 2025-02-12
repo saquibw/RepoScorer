@@ -16,6 +16,9 @@ COPY src src
 # Make gradlew executable
 RUN chmod +x gradlew
 
+# Run the tests first
+RUN ./gradlew test --no-daemon
+
 # Run the Gradle build to create the JAR file
 RUN ./gradlew build --no-daemon
 
