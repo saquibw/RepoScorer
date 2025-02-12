@@ -3,9 +3,6 @@ package com.scorer.repo.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.time.Duration;
-import java.util.ArrayList;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,8 +50,7 @@ public class GithubRepositoryServiceImplTest {
     
     @Test
     void shouldFetchFromCacheIfCached() {
-        RepositoryResponse cachedResponse = new RepositoryResponse(100, new ArrayList<>());
-        when(repositoryCacheClient.getItem(cacheKey, RepositoryResponse.class)).thenReturn(cachedResponse);
+        when(repositoryCacheClient.getItem(cacheKey, RepositoryResponse.class)).thenReturn(mockResponse);
 
         RepositoryResponse response = githubRepositoryService.fetchRepositories(language, createdAfter, page);
 
@@ -66,9 +62,6 @@ public class GithubRepositoryServiceImplTest {
     
     @Test
     void shouldFetchFromGithubIfNotCachedAndRateLimitNotExceeded() {
-        // Setup mocks
-        String cacheKey = "cachePrefix-java:2024-01-01";
-        RepositoryResponse mockResponse = new RepositoryResponse(100, new ArrayList<>());
         when(repositoryCacheClient.getItem(cacheKey, RepositoryResponse.class)).thenReturn(null);
         when(githubRateLimiterService.isRateLimited()).thenReturn(false);
         when(githubRepositoryClient.get("language:java+created:>2024-01-01", 1)).thenReturn(mockResponse);
@@ -79,7 +72,7 @@ public class GithubRepositoryServiceImplTest {
         assertEquals(100, response.getTotalCount());
         verify(repositoryCacheClient, times(1)).saveItem(eq(cacheKey), eq(mockResponse), any());
         verify(githubRepositoryClient, times(1)).get("language:java+created:>2024-01-01", 1);
-        verify(githubRateLimiterService, times(1)).isRateLimited();  // Verify rate limiter check
+        verify(githubRateLimiterService, times(1)).isRateLimited();
     }
     
     @Test
