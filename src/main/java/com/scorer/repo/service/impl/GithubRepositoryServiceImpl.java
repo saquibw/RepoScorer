@@ -6,6 +6,7 @@ import com.scorer.repo.client.CacheClient;
 import com.scorer.repo.client.RepositoryClient;
 import com.scorer.repo.config.GithubConfig;
 import com.scorer.repo.response.RepositoryResponse;
+import com.scorer.repo.service.RateLimiterService;
 import com.scorer.repo.service.RepositoryService;
 
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ public class GithubRepositoryServiceImpl implements RepositoryService{
 
 	private final RepositoryClient githubRepositoryClient;
 	private final CacheClient repositoryCacheClient;
+	private final RateLimiterService githubRateLimiterService;
 	private final GithubConfig githubConfig;
 
 	@Override
@@ -30,6 +32,11 @@ public class GithubRepositoryServiceImpl implements RepositoryService{
 			log.info("Fetching from Redis Cache!");
 			return cachedRepositories;
 		}
+		
+		if (githubRateLimiterService.isRateLimited()) {
+	        log.warn("GitHub API rate limit reached! Cannot fetch data at this time.");
+	        throw new RuntimeException("GitHub API rate limit exceeded. Please try again later.");
+	    }
 
 		String query = "language:" + language + "+created:>" + createdAfter;
 
