@@ -46,7 +46,7 @@ tasks.withType<Test> {
 
 tasks.test {
     testLogging {
-        events("passed", "skipped", "failed")  // Log passed, skipped, and failed tests
-        showStandardStreams = true  // Display test output in the console
+        events("passed", "skipped", "failed")
+        showStandardStreams = true
     }
 }
