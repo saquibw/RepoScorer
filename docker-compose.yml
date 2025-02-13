@@ -8,7 +8,9 @@ services:
       SPRING_DATA_REDIS_PORT: 6379
     depends_on:
       - redis  # Make sure Redis starts first
-
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      
   redis:
     image: "redis:latest"
     container_name: redis-server
