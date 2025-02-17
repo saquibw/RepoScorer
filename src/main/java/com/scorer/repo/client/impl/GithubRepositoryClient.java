@@ -10,7 +10,7 @@ import com.scorer.repo.dto.GithubRepositoryDto;
 import com.scorer.repo.dto.RepositoryDto;
 import com.scorer.repo.response.GithubRepositoryResponse;
 import com.scorer.repo.response.RepositoryResponse;
-import com.scorer.repo.service.RepositoryScorerService;
+import com.scorer.repo.utils.RepositoryScoreBuilder;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class GithubRepositoryClient implements RepositoryClient {
 	private final WebClient githubWebClient;
-	private final RepositoryScorerService repositoryScorerService;
 
 	@Override
 	public RepositoryResponse get(String query, Integer page) {
@@ -55,12 +54,16 @@ public class GithubRepositoryClient implements RepositoryClient {
 							repo.getWatchers_count(),
 							repo.getOpen_issues_count(),
 							repo.getUpdated_at(),
-							0.0  // Placeholder for the score
+							0.0
 							);
 
-					double score = repositoryScorerService.calculateScore(repositoryDto);
-
-					repositoryDto.setScore(score);
+					repositoryDto.setScore(new RepositoryScoreBuilder(repositoryDto)
+							.withStars()
+							.withForks()
+							.withWatchers()
+							.withIssuesPenalty()
+							.withRecency()
+							.build());;
 
 					return repositoryDto;
 				})

@@ -1,0 +1,14 @@
+● redis-server.service - Advanced key-value store
+     Loaded: loaded (/lib/systemd/system/redis-server.service; enabled; vendor preset: enabled)
+     Active: inactive (dead) since Sun 2025-02-16 14:25:09 CET; 51s ago
+       Docs: http://redis.io/documentation,
+             man:redis-server(1)
+    Process: 1556 ExecStart=/usr/bin/redis-server /etc/redis/redis.conf (code=exited, status=0/SUCCESS)
+   Main PID: 1618 (code=exited, status=0/SUCCESS)
+
+Feb 16 14:03:37 NEURA-763 systemd[1]: Starting Advanced key-value store...
+Feb 16 14:03:37 NEURA-763 systemd[1]: redis-server.service: Can't open PID file /run/redis/redis-server.pid (yet?) after start: Operation not permitted
+Feb 16 14:03:37 NEURA-763 systemd[1]: Started Advanced key-value store.
+Feb 16 14:25:09 NEURA-763 systemd[1]: Stopping Advanced key-value store...
+Feb 16 14:25:09 NEURA-763 systemd[1]: redis-server.service: Succeeded.
+Feb 16 14:25:09 NEURA-763 systemd[1]: Stopped Advanced key-value store.
