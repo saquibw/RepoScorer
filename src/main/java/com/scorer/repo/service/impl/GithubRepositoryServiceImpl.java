@@ -25,7 +25,6 @@ public class GithubRepositoryServiceImpl implements RepositoryService{
 	@Override
 	public RepositoryResponse fetchRepositories(String language, String createdAfter, Integer page) {
 		String cacheKey = githubConfig.getCachePrefix() + language + ":" + createdAfter + page;
-		log.info(cacheKey);
 
 		RepositoryResponse cachedRepositories = repositoryCacheClient.getItem(cacheKey, RepositoryResponse.class);
 
