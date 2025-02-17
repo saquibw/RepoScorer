@@ -4,11 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -19,18 +16,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClient.RequestHeadersUriSpec;
-import org.springframework.web.util.UriBuilder;
-
 import com.scorer.repo.client.impl.GithubRepositoryClient;
 import com.scorer.repo.dto.GithubRepositoryDto;
 import com.scorer.repo.response.GithubRepositoryResponse;
 import com.scorer.repo.response.RepositoryResponse;
-import com.scorer.repo.service.RepositoryScorerService;
-
 import reactor.core.publisher.Mono;
-
-import java.net.URI;
 
 @ExtendWith(MockitoExtension.class)
 public class GithubRepositoryClientTest {
@@ -50,15 +40,12 @@ public class GithubRepositoryClientTest {
 	@Mock
     private WebClient.ResponseSpec responseSpec;
 	
-	@Mock
-    private RepositoryScorerService repositoryScorerService;
-	
 	private GithubRepositoryClient githubRepositoryClient;
 	
 	@BeforeEach
     void setUp() {
 		MockitoAnnotations.openMocks(this);
-        githubRepositoryClient = new GithubRepositoryClient(webClient, repositoryScorerService);
+        githubRepositoryClient = new GithubRepositoryClient(webClient);
     }
 	
 	@Test
@@ -89,15 +76,11 @@ public class GithubRepositoryClientTest {
 	    when(headersSpec.retrieve()).thenReturn(responseSpec);
 	    when(responseSpec.bodyToMono(GithubRepositoryResponse.class)).thenReturn(Mono.just(githubResponse));
 
-	    when(repositoryScorerService.calculateScore(any())).thenReturn(80.0);
-
 	    RepositoryResponse response = githubRepositoryClient.get("language:java", 1);
 
 	    assertNotNull(response);
 	    assertEquals(1, response.getTotalCount());
-	    assertEquals(80.0, response.getRepositories().get(0).getScore());
-
-	    verify(repositoryScorerService, times(1)).calculateScore(any());
+	    assertEquals(296.68, response.getRepositories().getFirst().getScore(), 0.01);
 	}
 
 
