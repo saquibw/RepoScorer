@@ -47,13 +47,19 @@ public class GithubRepositoryIntegrationTest {
 
 	@Test
 	void testGetRepositoriesAndCacheInRedis() throws Exception {
+		System.out.println("Keys before request: " + redisTemplate.keys("*"));
 		HttpStatusCode statusCode = restTemplate.getForEntity("http://localhost:" + port + "/api/github/repositories?language=Java&created_after=2020-01-01&page=1", String.class)
 				.getStatusCode();
+		System.out.println("API Response Status: " + statusCode);
 		
 		assert(statusCode.is2xxSuccessful());
+		
+		System.out.println("Keys after request: " + redisTemplate.keys("*"));
 
 		String redisKey = "github_repos:Java:2020-01-011";
+		System.out.println(redisTemplate.opsForValue().get(redisKey));
 		Object result = redisTemplate.opsForValue().get(redisKey);
+		System.out.println("Cached result: " + result);
 
 		assertNotNull(result, "Data from GitHub should be stored in Redis");
 	}
