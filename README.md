@@ -7,7 +7,9 @@ RepoScorer is a Spring Boot application that fetches and scores GitHub repositor
 - Fetch repositories from GitHub using specific queries (language, creation date).
 - Calculate a score for each repository based on various metrics (stars, forks, watchers, issues).
 - Cache results in Redis to speed up future requests.
+- Rate-limited token pool is used to authenticate requests to GitHub, with token usage tracked in Redis for efficient load distribution.
 - Exposes a REST API with Swagger UI for easy testing and interaction.
+- Error handling and input validation for language, date, and page parameters to ensure correct and meaningful results.
 
 ## Endpoints
 
@@ -47,7 +49,7 @@ GET http://localhost:8080/api/github/repositories?language=java&created_after=20
 ```
 
 
-### Running the application
+## Running the application
 To run the application, follow these steps:
 
 1. Download the repository from https://github.com/saquibw/RepoScorer
@@ -61,17 +63,20 @@ Redis will run on its default port 6379.
 You can access the Swagger UI at http://localhost:8080/swagger-ui/index.html to explore and test the API.
 
 
-### Redis Setup
+## Redis Setup
 The application uses Redis for caching repository data. If you're running without Docker, you need to ensure that Redis is running locally or modify the configuration to connect to a remote Redis instance.
 
-### Testing the API
+## Testing the API
 You can test the API via the Swagger UI at:
 
 http://localhost:8080/swagger-ui/index.html
 
-### Authentication
+## Authentication
 The application is protected with basic authentication. Default credential is:
 
 User name: user
 
 Password: password
+
+## Token Pool Implementation
+The system uses a token pool to authenticate requests to GitHub, with each token allowing 30 requests per minute. Every minute, the token's usage counter is reset by GitHub. We store these counters in Redis to track the usage of each token. When making an API request, the system picks a token from the pool based on its current counter. For simplicity, the tokens are currently stored in the docker-compose.yml file, but it is recommended to use secret management tools for better security in production environments.
