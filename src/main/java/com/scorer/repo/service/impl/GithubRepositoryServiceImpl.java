@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.scorer.repo.client.CacheClient;
 import com.scorer.repo.client.RepositoryClient;
 import com.scorer.repo.config.GithubConfig;
+import com.scorer.repo.exception.RateLimitExceededException;
 import com.scorer.repo.response.RepositoryResponse;
 import com.scorer.repo.service.RateLimiterService;
 import com.scorer.repo.service.RepositoryService;
@@ -23,7 +24,7 @@ public class GithubRepositoryServiceImpl implements RepositoryService{
 	private final GithubConfig githubConfig;
 
 	@Override
-	public RepositoryResponse fetchRepositories(String language, String createdAfter, Integer page) {
+	public RepositoryResponse fetchRepositories(String language, String createdAfter, Integer page) throws RateLimitExceededException {
 		String cacheKey = githubConfig.getCachePrefix() + language + ":" + createdAfter + page;
 
 		RepositoryResponse cachedRepositories = repositoryCacheClient.getItem(cacheKey, RepositoryResponse.class);
@@ -33,14 +34,11 @@ public class GithubRepositoryServiceImpl implements RepositoryService{
 			return cachedRepositories;
 		}
 		
-		if (githubRateLimiterService.isRateLimited()) {
-	        log.warn("GitHub API rate limit reached! Cannot fetch data at this time.");
-	        throw new RuntimeException("GitHub API rate limit exceeded. Please try again later.");
-	    }
+		String token = githubRateLimiterService.getAvailableToken();
 
 		String query = "language:" + language + "+created:>" + createdAfter;
 
-		var githubRepositoryResponse = githubRepositoryClient.get(query, page);
+		var githubRepositoryResponse = githubRepositoryClient.get(query, page, token);
 
 		repositoryCacheClient.saveItem(cacheKey, githubRepositoryResponse, Duration.ofMinutes(githubConfig.getCacheTtl()));
 

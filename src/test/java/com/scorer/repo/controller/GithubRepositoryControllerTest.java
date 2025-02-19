@@ -14,7 +14,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.scorer.repo.response.RepositoryResponse;
 import com.scorer.repo.service.RepositoryService;
 
+import org.springframework.security.test.context.support.WithMockUser;
+
 @WebMvcTest(GithubRepositoryController.class)
+@WithMockUser(username = "testuser", roles = "USER")
 public class GithubRepositoryControllerTest {
 	@Autowired
 	private MockMvc mockMvc;

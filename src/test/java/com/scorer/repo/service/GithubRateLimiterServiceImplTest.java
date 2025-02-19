@@ -1,12 +1,10 @@
 package com.scorer.repo.service;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -14,60 +12,91 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 import com.scorer.repo.client.impl.RedisCacheClient;
+import com.scorer.repo.config.GithubConfig;
+import com.scorer.repo.exception.RateLimitExceededException;
 import com.scorer.repo.service.impl.GithubRateLimiterServiceImpl;
 
 public class GithubRateLimiterServiceImplTest {
 
 	@Mock
     private RedisCacheClient repositoryCacheService;
+	
+	@Mock
+    private GithubConfig githubConfig;
 
+	@Spy
     @InjectMocks
     private GithubRateLimiterServiceImpl rateLimiterService;
 
-    private String currentHourKey;
+    private static final String TOKEN_1 = "token_123";
+    private static final String TOKEN_2 = "token_456";
+    private static final String CURRENT_MINUTE = "202402191530";
+    private static final long MAX_REQUESTS = 5;
     
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        currentHourKey = "github-api-request-count:" + getCurrentHour();
+        when(githubConfig.getTokens()).thenReturn(List.of(TOKEN_1, TOKEN_2));
+        when(githubConfig.getMaxRequestLimit()).thenReturn(MAX_REQUESTS);
+        
+        doReturn(CURRENT_MINUTE).when(rateLimiterService).getCurrentMinute();
     }
     
     @Test
-    void shouldReturnTrueWhenRateLimitExceeded() {
-        when(repositoryCacheService.getItem(currentHourKey, String.class)).thenReturn("5000");
+    void shouldReturnTokenWhenUnderLimit() throws RateLimitExceededException {
+        String tokenKey1 = "github_rate_limit" + TOKEN_1 + ":" + CURRENT_MINUTE;
+        
+        when(repositoryCacheService.getItem(eq(tokenKey1), eq(String.class))).thenReturn("2");
 
-        boolean result = rateLimiterService.isRateLimited();
+        String availableToken = rateLimiterService.getAvailableToken();
 
-        assertTrue(result);
-        verify(repositoryCacheService, never()).increment(anyString(), anyLong());
-        verify(repositoryCacheService, never()).expire(anyString(), anyLong(), any());
+        assertEquals(TOKEN_1, availableToken);
+        verify(repositoryCacheService).increment(eq(tokenKey1), eq(1L));
+        verify(repositoryCacheService).expire(eq(tokenKey1), eq(60L), eq(TimeUnit.SECONDS));
     }
     
     @Test
-    void shouldIncrementCounterWhenRateLimitNotExceeded() {
-        when(repositoryCacheService.getItem(currentHourKey, String.class)).thenReturn("100");
+    void shouldReturnNextTokenIfFirstIsRateLimited() throws RateLimitExceededException {
+        String tokenKey1 = "github_rate_limit" + TOKEN_1 + ":" + CURRENT_MINUTE;
+        String tokenKey2 = "github_rate_limit" + TOKEN_2 + ":" + CURRENT_MINUTE;
 
-        boolean result = rateLimiterService.isRateLimited();
+        when(repositoryCacheService.getItem(eq(tokenKey1), eq(String.class))).thenReturn(String.valueOf(MAX_REQUESTS));
 
-        assertFalse(result);
-        verify(repositoryCacheService).increment(eq(currentHourKey), eq(1L));
-        verify(repositoryCacheService).expire(eq(currentHourKey), anyLong(), eq(TimeUnit.SECONDS));
+        when(repositoryCacheService.getItem(eq(tokenKey2), eq(String.class))).thenReturn("3");
+
+        String availableToken = rateLimiterService.getAvailableToken();
+
+        assertEquals(TOKEN_2, availableToken);
+        verify(repositoryCacheService).increment(eq(tokenKey2), eq(1L));
+        verify(repositoryCacheService).expire(eq(tokenKey2), eq(60L), eq(TimeUnit.SECONDS));
     }
     
     @Test
-    void shouldInitializeCounterWhenCacheIsEmpty() {
-        when(repositoryCacheService.getItem(currentHourKey, String.class)).thenReturn(null);
+    void shouldThrowExceptionWhenAllTokensAreRateLimited() {
+        String tokenKey1 = "github_rate_limit" + TOKEN_1 + ":" + CURRENT_MINUTE;
+        String tokenKey2 = "github_rate_limit" + TOKEN_2 + ":" + CURRENT_MINUTE;
 
-        boolean result = rateLimiterService.isRateLimited();
+        // Both tokens exceeded the rate limit
+        when(repositoryCacheService.getItem(eq(tokenKey1), eq(String.class))).thenReturn(String.valueOf(MAX_REQUESTS));
+        when(repositoryCacheService.getItem(eq(tokenKey2), eq(String.class))).thenReturn(String.valueOf(MAX_REQUESTS));
 
-        assertFalse(result);
-        verify(repositoryCacheService).increment(eq(currentHourKey), eq(1L));
-        verify(repositoryCacheService).expire(eq(currentHourKey), anyLong(), eq(TimeUnit.SECONDS));
+        assertThrows(RateLimitExceededException.class, () -> rateLimiterService.getAvailableToken());
     }
     
-    private String getCurrentHour() {
-        return String.valueOf(Instant.now().getEpochSecond() / 3600);
+    @Test
+    void shouldReturnTokenWhenCacheIsEmpty() throws RateLimitExceededException {
+        String tokenKey1 = "github_rate_limit" + TOKEN_1 + ":" + CURRENT_MINUTE;
+
+        // No cache entry, so it should be considered as 0
+        when(repositoryCacheService.getItem(eq(tokenKey1), eq(String.class))).thenReturn(null);
+
+        String availableToken = rateLimiterService.getAvailableToken();
+
+        assertEquals(TOKEN_1, availableToken);
+        verify(repositoryCacheService).increment(eq(tokenKey1), eq(1L));
+        verify(repositoryCacheService).expire(eq(tokenKey1), eq(60L), eq(TimeUnit.SECONDS));
     }
 }

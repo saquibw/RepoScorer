@@ -1,19 +1,14 @@
 package com.scorer.repo.service;
 
-import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+
+import com.scorer.repo.exception.RateLimitExceededException;
 
 public interface RateLimiterService {
-	boolean isRateLimited();
+	String getAvailableToken() throws RateLimitExceededException;
 	
-	default String getCurrentHour() {
-        return String.valueOf(Instant.now().getEpochSecond() / 3600);
+	default String getCurrentMinute() {
+        return String.valueOf(Instant.now().truncatedTo(ChronoUnit.MINUTES).getEpochSecond());
     }
-	
-	default long getTimeLeftInCurrentHour() {
-	    LocalDateTime now = LocalDateTime.now();
-	    LocalDateTime endOfCurrentHour = now.withMinute(59).withSecond(59).withNano(0);
-	    return Duration.between(now, endOfCurrentHour).getSeconds();
-	}
 }

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.scorer.repo.dto.Language;
 import com.scorer.repo.exception.InvalidRequestException;
+import com.scorer.repo.exception.RateLimitExceededException;
 import com.scorer.repo.response.RepositoryResponse;
 import com.scorer.repo.service.RepositoryService;
 
@@ -38,7 +39,7 @@ public class GithubRepositoryController {
 			@Parameter(description = "Programming language to filter repositories (Java, Cobol...)") @RequestParam(name = "language") @NotBlank(message = "Language is required and cannot be empty") String language,
 			@Parameter(description = "Fetch repositories created after this date (YYYY-MM-DD)") @RequestParam(name = "created_after") @NotBlank(message = "Date is required and cannot be empty") String created_after,
 			@Parameter(description = "Page number for pagination") @RequestParam(name = "page", defaultValue = "1") Integer page
-			) throws InvalidRequestException {
+			) throws InvalidRequestException, RateLimitExceededException {
 
 		if (!isValidDate(created_after)) {
 			throw new InvalidRequestException("Invalid date format or date is before 1970-01-01");

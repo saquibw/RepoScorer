@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.scorer.repo.client.CacheClient;
 import com.scorer.repo.client.RepositoryClient;
 import com.scorer.repo.config.GithubConfig;
+import com.scorer.repo.exception.RateLimitExceededException;
 import com.scorer.repo.response.RepositoryResponse;
 import com.scorer.repo.service.impl.GithubRepositoryServiceImpl;
 
@@ -49,7 +50,7 @@ public class GithubRepositoryServiceImplTest {
     }
     
     @Test
-    void shouldFetchFromCacheIfCached() {
+    void shouldFetchFromCacheIfCached() throws RateLimitExceededException {
         when(repositoryCacheClient.getItem(cacheKey, RepositoryResponse.class)).thenReturn(mockResponse);
 
         RepositoryResponse response = githubRepositoryService.fetchRepositories(language, createdAfter, page);
@@ -57,33 +58,34 @@ public class GithubRepositoryServiceImplTest {
         assertNotNull(response);
         assertEquals(100, response.getTotalCount());
         verify(repositoryCacheClient, times(1)).getItem(cacheKey, RepositoryResponse.class);
-        verify(githubRepositoryClient, times(0)).get(anyString(), anyInt());
+        verify(githubRepositoryClient, times(0)).get(anyString(), anyInt(), anyString());
     }
     
     @Test
-    void shouldFetchFromGithubIfNotCachedAndRateLimitNotExceeded() {
+    void shouldFetchFromGithubIfNotCachedAndRateLimitNotExceeded() throws RateLimitExceededException {        
         when(repositoryCacheClient.getItem(cacheKey, RepositoryResponse.class)).thenReturn(null);
-        when(githubRateLimiterService.isRateLimited()).thenReturn(false);
-        when(githubRepositoryClient.get("language:java+created:>2024-01-01", 1)).thenReturn(mockResponse);
+        when(githubRateLimiterService.getAvailableToken()).thenReturn("valid_token");
+        when(githubRepositoryClient.get("language:java+created:>2024-01-01", 1, "valid_token")).thenReturn(mockResponse);
 
         RepositoryResponse response = githubRepositoryService.fetchRepositories(language, createdAfter, page);
 
         assertNotNull(response);
         assertEquals(100, response.getTotalCount());
         verify(repositoryCacheClient, times(1)).saveItem(eq(cacheKey), eq(mockResponse), any());
-        verify(githubRepositoryClient, times(1)).get("language:java+created:>2024-01-01", 1);
-        verify(githubRateLimiterService, times(1)).isRateLimited();
+        verify(githubRepositoryClient, times(1)).get("language:java+created:>2024-01-01", 1, "valid_token");
+        verify(githubRateLimiterService, times(1)).getAvailableToken();
     }
     
     @Test
-    void shouldThrowExceptionIfRateLimitExceeded() {
-        when(githubRateLimiterService.isRateLimited()).thenReturn(true);
+    void shouldThrowExceptionIfRateLimitExceeded() throws RateLimitExceededException {
+        when(githubRateLimiterService.getAvailableToken()).thenThrow(RateLimitExceededException.class);
 
-        assertThrows(RuntimeException.class, () -> {
+
+        assertThrows(RateLimitExceededException.class, () -> {
             githubRepositoryService.fetchRepositories(language, createdAfter, page);
         });
 
-        verify(githubRateLimiterService, times(1)).isRateLimited();
-        verify(githubRepositoryClient, times(0)).get(anyString(), anyInt());
+        verify(githubRateLimiterService, times(1)).getAvailableToken();
+        verify(githubRepositoryClient, times(0)).get(anyString(), anyInt(), anyString());
     }
 }

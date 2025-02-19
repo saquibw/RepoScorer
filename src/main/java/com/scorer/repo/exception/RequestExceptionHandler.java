@@ -15,12 +15,14 @@ public class RequestExceptionHandler {
     @ExceptionHandler(InvalidRequestException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleInvalidRequestValidations(InvalidRequestException ex) {
+    	System.out.println(ex);
     	return new ErrorResponse(ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleAllException(Exception ex) {
+    	System.out.println(ex);
         return new ErrorResponse(ex.getMessage());
     }
 }

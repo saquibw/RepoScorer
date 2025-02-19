@@ -4,9 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -16,10 +18,12 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.reactive.function.client.WebClient;
+
 import com.scorer.repo.client.impl.GithubRepositoryClient;
 import com.scorer.repo.dto.GithubRepositoryDto;
 import com.scorer.repo.response.GithubRepositoryResponse;
 import com.scorer.repo.response.RepositoryResponse;
+
 import reactor.core.publisher.Mono;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,6 +46,8 @@ public class GithubRepositoryClientTest {
 	
 	private GithubRepositoryClient githubRepositoryClient;
 	
+	private final String TOKEN = "test-token";
+	
 	@BeforeEach
     void setUp() {
 		MockitoAnnotations.openMocks(this);
@@ -54,15 +60,18 @@ public class GithubRepositoryClientTest {
 
 	    // Mock WebClient behavior
 	    when(webClient.get()).thenReturn((WebClient.RequestHeadersUriSpec) uriSpec);
-        when(uriSpec.uri(any(Function.class))).thenReturn(headersSpec); // Fix: Match expected type
+        when(uriSpec.uri(any(Function.class))).thenReturn(headersSpec);
+        when(headersSpec.headers(any(Consumer.class))).thenReturn(headersSpec);
         when(headersSpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.bodyToMono(GithubRepositoryResponse.class)).thenReturn(Mono.just(githubResponse));
 
-	    RepositoryResponse response = githubRepositoryClient.get("language:java", 1);
+	    RepositoryResponse response = githubRepositoryClient.get("language:java", 1, TOKEN);
 
 	    assertNotNull(response);
 	    assertEquals(0, response.getTotalCount());
 	    assertTrue(response.getRepositories().isEmpty());
+	    
+	    verify(headersSpec).headers(any(Consumer.class));
 	}
 	
 	@Test
@@ -73,14 +82,17 @@ public class GithubRepositoryClientTest {
 
 	    when(webClient.get()).thenReturn((WebClient.RequestHeadersUriSpec) uriSpec);
 	    when(uriSpec.uri(any(Function.class))).thenReturn(headersSpec);
+	    when(headersSpec.headers(any(Consumer.class))).thenReturn(headersSpec);
 	    when(headersSpec.retrieve()).thenReturn(responseSpec);
 	    when(responseSpec.bodyToMono(GithubRepositoryResponse.class)).thenReturn(Mono.just(githubResponse));
 
-	    RepositoryResponse response = githubRepositoryClient.get("language:java", 1);
+	    RepositoryResponse response = githubRepositoryClient.get("language:java", 1, TOKEN);
 
 	    assertNotNull(response);
 	    assertEquals(1, response.getTotalCount());
 	    assertEquals(296.68, response.getRepositories().getFirst().getScore(), 0.01);
+	    
+	    verify(headersSpec).headers(any(Consumer.class));
 	}
 
 

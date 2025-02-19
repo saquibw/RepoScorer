@@ -13,7 +13,7 @@ RepoScorer is a Spring Boot application that fetches and scores GitHub repositor
 
 You can access the REST API documentation via Swagger at the following URL:
 
-[Swagger UI](http://localhost:8080/swagger-ui/index.html)
+http://localhost:8080/swagger-ui/index.html
 
 - `GET /api/github/repositories`
     - **Parameters:**
@@ -46,47 +46,19 @@ GET http://localhost:8080/api/github/repositories?language=java&created_after=20
 }
 ```
 
-### Setup
-To run the application locally, follow the steps below.
 
-Prerequisites
-* Docker
-* Docker Compose
-* Java 21+ (for building from source)
-* Gradle (if building from source)
+### Running the application
+To run the application, follow these steps:
 
-### Running with Docker
-To run the application and Redis using Docker, follow these steps:
+1. Download the repository from https://github.com/saquibw/RepoScorer
 
-1. Download the repository from
-https://github.com/saquibw/RepoScorer.git
-cd RepoScorer
-
-2. Build the Docker images and start the services:
-docker-compose up --build
+2. Build the Docker images and start the services using command: docker compose up --build
 
 This command will build the Docker images for both the app and the Redis server, then start both containers.
 
 The app will be available at http://localhost:8080.
 Redis will run on its default port 6379.
 You can access the Swagger UI at http://localhost:8080/swagger-ui/index.html to explore and test the API.
-
-
-
-### Running Without Docker
-If you prefer to run the application without Docker, follow these steps:
-
-1. Download the repository from:
-https://github.com/saquibw/RepoScorer.git
-cd RepoScorer
-
-2. Build the application using Gradle:
-./gradlew build
-
-3. Run the application:
-java -jar build/libs/RepoScorer-0.0.1-SNAPSHOT.jar
-
-4. Access the application at http://localhost:8080.
 
 
 ### Redis Setup
@@ -96,3 +68,10 @@ The application uses Redis for caching repository data. If you're running withou
 You can test the API via the Swagger UI at:
 
 http://localhost:8080/swagger-ui/index.html
+
+### Authentication
+The application is protected with basic authentication. Default credential is:
+
+User name: user
+
+Password: password

@@ -6,6 +6,8 @@ services:
     environment:
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
+      SECURITY_USER: user
+      SECURITY_PASSWORD: password
     depends_on:
       - redis
       
