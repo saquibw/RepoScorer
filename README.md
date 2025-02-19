@@ -52,15 +52,28 @@ GET http://localhost:8080/api/github/repositories?language=java&created_after=20
 ## Running the application
 To run the application, follow these steps:
 
-1. Download the repository from https://github.com/saquibw/RepoScorer
+1. Download the repository from [https://github.com/saquibw/RepoScorer](https://github.com/saquibw/RepoScorer).
 
-2. Build the Docker images and start the services using command: docker compose up --build
+2. The `.env` file containing the GitHub API token pool can be downloaded from the following link:  
+   [https://drive.google.com/file/d/1Yy4APvOIeBnHqYtOR0fNd7wmdy1bh3VT/view?usp=sharing](#).
+   
+3. Place the downloaded `.env` file in the **root directory** of the project.
+
+4. Build the Docker images and start the services using the command:
+   
+```bash
+docker compose up --build
+```
 
 This command will build the Docker images for both the app and the Redis server, then start both containers.
 
 The app will be available at http://localhost:8080.
+
 Redis will run on its default port 6379.
+
 You can access the Swagger UI at http://localhost:8080/swagger-ui/index.html to explore and test the API.
+
+Note: GitHub tokens have a validity of 30 days (starting from February 19, 2025)
 
 
 ## Redis Setup
@@ -79,4 +92,4 @@ User name: user
 Password: password
 
 ## Token Pool Implementation
-The system uses a token pool to authenticate requests to GitHub, with each token allowing 30 requests per minute. Every minute, the token's usage counter is reset by GitHub. We store these counters in Redis to track the usage of each token. When making an API request, the system picks a token from the pool based on its current counter. For simplicity, the tokens are currently stored in the docker-compose.yml file, but it is recommended to use secret management tools for better security in production environments.
+The system uses a token pool to authenticate requests to GitHub, with each token allowing 30 requests per minute. Every minute, the token's usage counter is reset by GitHub. We store these counters in Redis to track the usage of each token. When making an API request, the system picks a token from the pool based on its current counter.
