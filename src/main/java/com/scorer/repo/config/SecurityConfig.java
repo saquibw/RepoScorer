@@ -32,11 +32,7 @@ public class SecurityConfig {
 				.anyRequest().authenticated()
 				)
 		.formLogin(formLogin -> formLogin
-				//.defaultSuccessUrl("/swagger-ui/index.html", true)
-				//.defaultSuccessUrl("/api/github/repositories?language=Java&created_after=2020-01-01&page=1", true)
-				.successHandler((request, response, authentication) -> {
-			        response.sendRedirect("/swagger-ui/index.html"); // Force a GET request
-			    })
+				.defaultSuccessUrl("/swagger-ui/index.html", true)
 				.permitAll()
 				)
 		.logout(logout -> logout

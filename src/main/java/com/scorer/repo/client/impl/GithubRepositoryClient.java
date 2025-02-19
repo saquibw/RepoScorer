@@ -30,7 +30,6 @@ public class GithubRepositoryClient implements RepositoryClient {
 	}
 
 	private GithubRepositoryResponse fetchDataFromGithub(String query, Integer page, String token) {
-		log.debug("Using token: " + token); // Log the token
 		return githubWebClient.get()
 				.uri(uriBuilder -> uriBuilder.path("/search/repositories")
 						.queryParam("q", query)

@@ -8,6 +8,7 @@ services:
       SPRING_DATA_REDIS_PORT: 6379
       SECURITY_USER: user
       SECURITY_PASSWORD: password
+      GITHUB_TOKEN: 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,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
     depends_on:
       - redis
       
