@@ -31,6 +31,7 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.15.0")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5")
     implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("io.github.cdimascio:dotenv-kotlin:6.5.0")
     
 	
 	developmentOnly("org.springframework.boot:spring-boot-devtools")

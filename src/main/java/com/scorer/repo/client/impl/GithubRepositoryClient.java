@@ -30,6 +30,7 @@ public class GithubRepositoryClient implements RepositoryClient {
 	}
 
 	private GithubRepositoryResponse fetchDataFromGithub(String query, Integer page, String token) {
+		System.out.println(token);
 		return githubWebClient.get()
 				.uri(uriBuilder -> uriBuilder.path("/search/repositories")
 						.queryParam("q", query)
@@ -49,13 +50,13 @@ public class GithubRepositoryClient implements RepositoryClient {
 				.map(repo -> {
 					RepositoryDto repositoryDto = new RepositoryDto(
 							repo.getName(),
-							repo.getFull_name(),
+							repo.getFullName(),
 							repo.getDescription(),
-							repo.getStargazers_count(),
-							repo.getForks_count(),
-							repo.getWatchers_count(),
-							repo.getOpen_issues_count(),
-							repo.getUpdated_at(),
+							repo.getStargazersCount(),
+							repo.getForksCount(),
+							repo.getWatchersCount(),
+							repo.getOpenIssuesCount(),
+							repo.getUpdatedAt(),
 							0.0
 							);
 

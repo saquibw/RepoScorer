@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: RepoScorer
+
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      timeout: ${SPRING_DATA_REDIS_TTL:60000}
+
+github:
+  apiUrl: https://api.github.com
+  cachePrefix: github_repos
+  cacheTtl: 10
+  maxRequestLimit: 30
+  tokens: ${GITHUB_TOKEN}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+app:
+  security:
+    user: ${SECURITY_USER:user}
+    password: ${SECURITY_PASSWORD:password}
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+  
+

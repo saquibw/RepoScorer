@@ -47,7 +47,7 @@ public class GithubRateLimiterServiceImplTest {
     
     @Test
     void shouldReturnTokenWhenUnderLimit() throws RateLimitExceededException {
-        String tokenKey1 = "github_rate_limit" + TOKEN_1 + ":" + CURRENT_MINUTE;
+        String tokenKey1 = String.format("github_rate_limit_%s_%s", TOKEN_1, CURRENT_MINUTE);
         
         when(repositoryCacheService.getItem(eq(tokenKey1), eq(String.class))).thenReturn("2");
 
@@ -60,8 +60,8 @@ public class GithubRateLimiterServiceImplTest {
     
     @Test
     void shouldReturnNextTokenIfFirstIsRateLimited() throws RateLimitExceededException {
-        String tokenKey1 = "github_rate_limit" + TOKEN_1 + ":" + CURRENT_MINUTE;
-        String tokenKey2 = "github_rate_limit" + TOKEN_2 + ":" + CURRENT_MINUTE;
+    	String tokenKey1 = String.format("github_rate_limit_%s_%s", TOKEN_1, CURRENT_MINUTE);
+    	String tokenKey2 = String.format("github_rate_limit_%s_%s", TOKEN_2, CURRENT_MINUTE);
 
         when(repositoryCacheService.getItem(eq(tokenKey1), eq(String.class))).thenReturn(String.valueOf(MAX_REQUESTS));
 
@@ -76,8 +76,8 @@ public class GithubRateLimiterServiceImplTest {
     
     @Test
     void shouldThrowExceptionWhenAllTokensAreRateLimited() {
-        String tokenKey1 = "github_rate_limit" + TOKEN_1 + ":" + CURRENT_MINUTE;
-        String tokenKey2 = "github_rate_limit" + TOKEN_2 + ":" + CURRENT_MINUTE;
+    	String tokenKey1 = String.format("github_rate_limit_%s_%s", TOKEN_1, CURRENT_MINUTE);
+    	String tokenKey2 = String.format("github_rate_limit_%s_%s", TOKEN_2, CURRENT_MINUTE);
 
         // Both tokens exceeded the rate limit
         when(repositoryCacheService.getItem(eq(tokenKey1), eq(String.class))).thenReturn(String.valueOf(MAX_REQUESTS));
@@ -88,9 +88,8 @@ public class GithubRateLimiterServiceImplTest {
     
     @Test
     void shouldReturnTokenWhenCacheIsEmpty() throws RateLimitExceededException {
-        String tokenKey1 = "github_rate_limit" + TOKEN_1 + ":" + CURRENT_MINUTE;
+    	String tokenKey1 = String.format("github_rate_limit_%s_%s", TOKEN_1, CURRENT_MINUTE);
 
-        // No cache entry, so it should be considered as 0
         when(repositoryCacheService.getItem(eq(tokenKey1), eq(String.class))).thenReturn(null);
 
         String availableToken = rateLimiterService.getAvailableToken();

@@ -1,6 +1,8 @@
 package com.scorer.repo.service.impl;
 
 import java.time.Duration;
+import java.time.LocalDate;
+
 import org.springframework.stereotype.Service;
 import com.scorer.repo.client.CacheClient;
 import com.scorer.repo.client.RepositoryClient;
@@ -25,7 +27,7 @@ public class GithubRepositoryServiceImpl implements RepositoryService{
 
 	@Override
 	public RepositoryResponse fetchRepositories(String language, String createdAfter, Integer page) throws RateLimitExceededException {
-		String cacheKey = githubConfig.getCachePrefix() + language + ":" + createdAfter + page;
+		String cacheKey = String.format("%s_%s_%s_%s", githubConfig.getCachePrefix(), language, createdAfter, page);
 
 		RepositoryResponse cachedRepositories = repositoryCacheClient.getItem(cacheKey, RepositoryResponse.class);
 
@@ -36,7 +38,7 @@ public class GithubRepositoryServiceImpl implements RepositoryService{
 		
 		String token = githubRateLimiterService.getAvailableToken();
 
-		String query = "language:" + language + "+created:>" + createdAfter;
+		String query = String.format("language:%s+created:>%s", language, createdAfter);
 
 		var githubRepositoryResponse = githubRepositoryClient.get(query, page, token);
 

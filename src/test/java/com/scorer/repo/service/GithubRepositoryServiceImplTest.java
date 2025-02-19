@@ -38,7 +38,7 @@ public class GithubRepositoryServiceImplTest {
 	private final String language = "java";
     private final String createdAfter = "2024-01-01";
     private final Integer page = 1;
-    private final String cacheKey = "cachePrefix-java:2024-01-011";
+    private final String cacheKey = "cachePrefix_java_2024-01-01_1";
     
     private RepositoryResponse mockResponse;
     
@@ -46,7 +46,7 @@ public class GithubRepositoryServiceImplTest {
     void setUp() {
         mockResponse = new RepositoryResponse(100, null);
 
-        when(githubConfig.getCachePrefix()).thenReturn("cachePrefix-");
+        when(githubConfig.getCachePrefix()).thenReturn("cachePrefix");
     }
     
     @Test

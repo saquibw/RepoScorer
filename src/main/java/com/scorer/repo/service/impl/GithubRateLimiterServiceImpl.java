@@ -27,10 +27,10 @@ public class GithubRateLimiterServiceImpl implements RateLimiterService {
         String currentMinute = getCurrentMinute();
 
         for (String token : tokenPool) {
-            String tokenKey = RATE_LIMIT_KEY + token + ":" + currentMinute;
+            String tokenKey = String.format("%s_%s_%s", RATE_LIMIT_KEY, token, currentMinute);
             String requestCount = repositoryCacheService.getItem(tokenKey, String.class);
             
-            log.info("Token {} used {}/{} times this minute", token, requestCount, githubConfig.getMaxRequestLimit());
+            //log.info("Token {} used {}/{} times this minute", token, requestCount, githubConfig.getMaxRequestLimit());
 
             int currentCount = (requestCount != null) ? Integer.parseInt(requestCount) : 0;
             if (currentCount < githubConfig.getMaxRequestLimit()) {
